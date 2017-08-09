@@ -1,11 +1,12 @@
 package com.deppon.csdn_study.spout;
 
+import com.deppon.first_storm.util.Utils;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichSpout;
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-
 import java.util.Map;
 import java.util.Random;
 
@@ -21,6 +22,7 @@ import java.util.Random;
 public class PhoneTerminalSpout extends BaseRichSpout {
     String [] phones = {"iphone","xiaomi","yijia","google","sunsumg","huawei","meizu"};
 
+    private SpoutOutputCollector collector;
 
 
     /**
@@ -31,7 +33,7 @@ public class PhoneTerminalSpout extends BaseRichSpout {
      */
     @Override
     public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
-
+        this.collector = spoutOutputCollector;
     }
 
     /**
@@ -40,9 +42,17 @@ public class PhoneTerminalSpout extends BaseRichSpout {
      */
     @Override
     public void nextTuple() {
+        //休眠1s在发送出去
+        Utils.sleep(1000);
         Random r = new Random();
         String phone = phones[r.nextInt(phones.length)];
-
+        //将拿到的数据封装在tuple中发送出去
+        /**
+         * 一个tuple中可以发送多个数据
+         * 封装在list中
+         * collector.emit(new values("","",""))
+         */
+        collector.emit(new Values(phone));
     }
 
     /**
@@ -52,7 +62,11 @@ public class PhoneTerminalSpout extends BaseRichSpout {
      */
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-
+        /**
+         * 为发出的tuple中的每个字段定义一个name
+         * outputFieldsDeclarer.declare(new Fields("field1","field2","field3"));
+         */
+        outputFieldsDeclarer.declare(new Fields("spout_phone"));
     }
 
 
